@@ -8,9 +8,18 @@ const root = document.getElementById('root');
 
 if (root) {
     ReactDOM.createRoot(root).render(
-        <React.StrictMode>
-            <App />
-        </React.StrictMode>
+        <App />
+
+        /**
+         * Strict mode can’t automatically detect side effects for you,
+         * but it can help you spot them by making them a little more deterministic.
+         * This is done by intentionally double-invoking...
+         * 
+         */
+
+        // <React.StrictMode>
+        //     <App />
+        // </React.StrictMode>
     );
 }
 
