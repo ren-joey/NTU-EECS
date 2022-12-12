@@ -4,12 +4,14 @@
 
 /* Start purging... */
 @tailwind components;
+
 /* Stop purging. */
 
 /* Your own custom component styles */
 
 /* Start purging... */
 @tailwind utilities;
+
 /* Stop purging. */
 
 /* Your own custom utilities */
