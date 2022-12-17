@@ -12,5 +12,20 @@
             // but *only* in ts-node.  Useful if you want ts-node and tsc to use
             // different options with a single tsconfig.json.
         }
+<<<<<<< HEAD
     }
+=======
+    },
+    "compilerOptions": {
+        // typescript options here
+        "baseUrl": "../",
+        "typeRoots": [
+            "../@types",
+            "../../node_modules/@types"
+        ]
+    },
+    "include": [
+        "../**/*"
+    ]
+>>>>>>> 25a5939fd277e06ce6bdd6bf253deca9c05b27fc
 }
