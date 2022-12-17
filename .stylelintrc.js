@@ -8,6 +8,12 @@ module.exports = {
         "stylelint-order"
     ],
     rules: {
+        'scss/at-rule-no-unknown': [
+            true,
+            {
+                'ignoreAtRules': ['tailwind']
+            }
+        ],
         "max-nesting-depth": null,
         "no-empty-source": null,
         "no-descending-specificity": null,
