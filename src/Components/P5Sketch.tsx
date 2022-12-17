@@ -2,6 +2,7 @@ import p5Types from 'p5';
 import { useEffect, useState } from 'react';
 import Sketch from 'react-p5';
 import rooms from 'src/data-set/json-data/rooms.json';
+import patients from 'src/data-set/json-data/patients.json';
 import './rooms.scss';
 
 const buttonClasses = 'bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 mx-1 rounded';
@@ -39,6 +40,13 @@ const roomEntitiesRenderer = (p5: p5Types, roomObjects: RoomObject[]) => {
             30,
             30
         );
+    }
+};
+
+const patientObjectDistributer = (date: Date, roomObjects: RoomObject[]) => {
+    const newPatients = patients[date.toString()];
+    for (let i = 0; i < newPatients.length; i++) {
+        const patient = newPatients[i];
     }
 };
 

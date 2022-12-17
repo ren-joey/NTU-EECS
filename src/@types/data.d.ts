@@ -7,13 +7,27 @@ interface RoomObject {
 
 interface PatientObject {
     name: string;
-    bedHistory: BedHistory;
+    id: string;
+    bedHistory: BedHistory[];
     transferringFrom: null | string;
     transferringTo: null | string;
-    trnasferringProgress: number;
+    transferringProgress: number;
 }
 
 interface BedHistory {
-    TransferInDate: Date;
-    TransferOutDate: Date;
+    bedCode: string;
+    transferInDate: Date;
+    transferOutDate: Date;
+}
+
+declare module 'src/data-set/json-data/patients.json' {
+    const value: {
+        [key: string]: PatientObject[]
+    };
+    export default value;
+}
+
+declare module 'src/data-set/json-data/rooms.json' {
+    const value: string[];
+    export default value;
 }
