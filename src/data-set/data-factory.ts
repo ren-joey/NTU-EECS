@@ -47,7 +47,7 @@ const patientFactory = (start: Date): PatientObject => {
         id: '',
         transferringFrom: null,
         transferringTo: null,
-        trnasferringProgress: 0
+        transferringProgress: 0
     };
 };
 
