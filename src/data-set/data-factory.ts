@@ -1,25 +1,19 @@
 import * as fs from 'fs';
+import randomPick from '../utils/array/random-pick';
+import addDate from '../utils/date/add-date';
+import getRandomInteger from '../utils/math/get-random-integer';
+import { getRandomChineseName } from '../utils/string/get-random-chinese-name';
+import getRandomTaiwanAddress from '../utils/string/get-random-taiwan-address';
+import getRandomTaiwanId from '../utils/string/get-random-taiwan-id';
 
 const rooms = [
-    '05A-01-01', '05A-01-02', '05A-01-03', '05A-01-04',
-    '05A-02-01', '05A-02-02', '05A-02-03', '05A-02-04',
-    '05A-03-01', '05A-03-02', '05A-03-03', '05A-03-04',
-    '05A-04-01', '05A-04-02', '05A-04-03', '05A-04-04'
+    '04A-01-01', '04A-01-02', '04A-01-03',
+    '04A-02-01', '04A-02-02', '04A-02-03',
+    '04A-03-01', '04A-03-02', '04A-03-03',
+    '05A-01-01', '05A-01-02', '05A-01-03',
+    '05A-02-01', '05A-02-02', '05A-02-03',
+    '05A-03-01', '05A-03-02', '05A-03-03'
 ];
-
-const randomPick = <T>(arr: T[]): T => {
-    return arr[getRandomInteger(0, arr.length - 1)];
-};
-
-const getRandomInteger = (min: number, max: number) => {
-    return Math.random() * (max - min) + min;
-};
-
-const addDate = (date: Date, num: number): Date => {
-    return new Date(
-        Date.parse(date.toString()) + num
-    );
-};
 
 const bedHistoryFactory = (start: Date): BedHistory[] => {
     const bedHistories: BedHistory[] = [];
@@ -28,11 +22,12 @@ const bedHistoryFactory = (start: Date): BedHistory[] => {
         : getRandomInteger(1, 3);
 
     for (let i = 0; i < transferTimes; i += 1) {
-        const nextDate = addDate(start, 86400000 * getRandomInteger(1, 14));
+        const nextDate = addDate(start, 86400000 * getRandomInteger(3, 14));
+        const bedCode = randomPick(rooms);
         bedHistories.push({
+            bedCode,
             transferInDate: start,
-            transferOutDate: nextDate,
-            bedCode: randomPick(rooms)
+            transferOutDate: nextDate
         });
         start = nextDate;
     }
@@ -40,11 +35,18 @@ const bedHistoryFactory = (start: Date): BedHistory[] => {
     return bedHistories;
 };
 
+let infectRate = 0;
+
 const patientFactory = (start: Date): PatientObject => {
+    infectRate += Math.abs(Math.random() * 0.2 - 0.12);
+    if (infectRate > 1) infectRate = 1;
+
     return {
+        id: getRandomTaiwanId(),
+        name: getRandomChineseName(),
+        address: getRandomTaiwanAddress(),
+        infectStatus: Math.random() * infectRate > 0.95 ? true : false,
         bedHistory: bedHistoryFactory(start),
-        name: '',
-        id: '',
         transferringFrom: null,
         transferringTo: null,
         transferringProgress: 0
@@ -63,8 +65,11 @@ const dataFactory = () => {
     } = {};
 
     while (start < end) {
-        const amount = Math.floor(Math.random() * 10);
-        const dailyPatients: PatientObject[] = new Array(amount).fill(patientFactory(start));
+        const amount = Math.random() > 0.8 ? getRandomInteger(1, 3) : 0;
+        const dailyPatients: PatientObject[] = [];
+        for (let i = 0; i < amount; i++) {
+            dailyPatients.push(patientFactory(start));
+        }
         patients[start.toString()] = dailyPatients;
         start = new Date(Date.parse(start.toString()) + 3600000);
     }

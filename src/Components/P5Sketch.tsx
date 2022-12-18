@@ -2,81 +2,78 @@ import p5Types from 'p5';
 import { useEffect, useState } from 'react';
 import Sketch from 'react-p5';
 import rooms from 'src/data-set/json-data/rooms.json';
-import patients from 'src/data-set/json-data/patients.json';
+
 import './rooms.scss';
+import SideBar from './SideBar/SideBar';
+import patientObjectDistributer from './functions/patient-object-distributer';
+import roomObjectsOrganizer from './functions/room-objects-organizer';
+import getCanvasSize from './functions/get-canvas-size';
+import getTransferPatientRecordsWithPosition from './functions/get-transfer-patient-records-with-position';
+import transferPatientsRenderer from './renderers/transfer-patients-renderer';
+import roomEntitiesRenderer from './renderers/room-entities-renderer';
 
 const buttonClasses = 'bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 mx-1 rounded';
 
-const x = 50;
-const y = 50;
-const size = () => window.innerHeight > window.innerWidth ? window.innerWidth : window.innerHeight;
-
-const roomObjectOrganizer = (rooms: string[]): RoomObject[] => {
-    const radius = rooms.length * 100 / Math.PI / 2;
-    const roomObjects = rooms.map((room, idx) => {
-        const anglePeriod = Math.PI * 2 / rooms.length;
-        const angle = anglePeriod * idx;
-        const x = radius * Math.cos(angle);
-        const y = radius * Math.sin(angle);
-        return {
-            name: room,
-            x: x + (size() / 2),
-            y: y + (size() / 2),
-            occupy: []
-        };
-    });
-
-    return roomObjects;
-};
-
-const roomEntitiesRenderer = (p5: p5Types, roomObjects: RoomObject[]) => {
-    p5.fill(0x0);
-
-    for (let i = 0; i < roomObjects.length; i++) {
-        const roomObject = roomObjects[i];
-        p5.ellipse(
-            roomObject.x,
-            roomObject.y,
-            30,
-            30
-        );
-    }
-};
-
-const patientObjectDistributer = (date: Date, roomObjects: RoomObject[]) => {
-    const newPatients = patients[date.toString()];
-    for (let i = 0; i < newPatients.length; i++) {
-        const patient = newPatients[i];
-    }
-};
+interface RoomMappingByBedCode {
+    [key: string]: RoomObject
+}
 
 const P5Sketch = () => {
     const [dateStart, setDateStart] = useState(new Date('2021/01/01 00:00:00'));
     const [speed, setSpeed] = useState(1);
     const [roomObjects, setRoomObjects] = useState<RoomObject[]>(
-        roomObjectOrganizer(rooms)
+        roomObjectsOrganizer(rooms)
     );
+    const [selectedRoom, setSelectedRoom] = useState<null|RoomObject>(null);
+    const [paused, setPaused] = useState(false);
+    const [
+        transferPatientsWithRecord,
+        setTransferPatientsWithRecord
+    ] = useState<TransferRecordWithPosition[]>([]);
+    const getRoomByBedCode = (bedCode: string): RoomObject => {
+        const roomMap = roomObjects.reduce((map: RoomMappingByBedCode, room) => {
+            map[room.name] = room;
+            return map;
+        }, {});
 
-    useEffect(() => {
-        roomObjects.forEach((roomObject) => {
-            console.log(roomObject.x, roomObject.y);
-        });
-    }, [roomObjects]);
+        return roomMap[bedCode];
+    };
+    const togglePause = () => setPaused((b) => !b);
 
     const setup = (p5: p5Types, canvasParentRef: Element) => {
-        p5.createCanvas(size(), size()).parent(canvasParentRef);
+        p5.createCanvas(getCanvasSize(), getCanvasSize()).parent(canvasParentRef);
     };
 
     const draw = (p5: p5Types) => {
+        if (paused) return;
+
         p5.clear();
         setDateStart(
             new Date(
-                Date.parse(dateStart.toString()) + (1000 * speed)
+                Date.parse(dateStart.toString()) + (1000 * 3600 * speed)
             )
         );
 
+        const {
+            roomObjects: _roomObjects,
+            transferPatients,
+            newPatients,
+            leavingPatients
+        } = patientObjectDistributer(
+            dateStart,
+            rooms,
+            roomObjects,
+            getRoomByBedCode
+        );
+        const _transferRecordsWithPosition = getTransferPatientRecordsWithPosition(
+            dateStart,
+            transferPatients.concat(transferPatientsWithRecord)
+        );
+
+        transferPatientsRenderer(p5, _transferRecordsWithPosition);
         roomEntitiesRenderer(p5, roomObjects);
-        setRoomObjects(roomObjects);
+        setTransferPatientsWithRecord(_transferRecordsWithPosition);
+        setRoomObjects(_roomObjects);
     };
 
     return (
@@ -86,11 +83,20 @@ const P5Sketch = () => {
                 draw={draw}
             />
 
+            {
+                selectedRoom !== null && (
+                    <SideBar
+                        roomObject={selectedRoom}
+                        setSelectedRoom={setSelectedRoom}
+                    />
+                )
+            }
+
             <div
                 className="rooms-container"
                 style={{
-                    width: size(),
-                    height: size()
+                    width: getCanvasSize(),
+                    height: getCanvasSize()
                 }}
             >
                 <div className="time">
@@ -110,31 +116,25 @@ const P5Sketch = () => {
                     </button>
                     <button
                         className={buttonClasses}
-                        onClick={() => setSpeed(100)}
-                    >x100
-                    </button>
-                    <button
-                        className={buttonClasses}
-                        onClick={() => setSpeed(1000)}
-                    >x1000
-                    </button>
-                    <button
-                        className={buttonClasses}
-                        onClick={() => setSpeed(10000)}
-                    >x10000
+                        onClick={() => togglePause()}
+                    >{ paused ? 'play' : 'pause'}
                     </button>
                 </div>
                 {
-                    roomObjects.map((room) => (
+                    roomObjects.map((room, idx) => (
                         <div
                             className="room"
                             style={{
                                 top: room.y,
                                 left: room.x
                             }}
-                            key={Math.random()}
+                            onClick={() => setSelectedRoom(room)}
+                            key={`room${idx}`}
                         >
                             {room.name}
+                            <br />
+                            (+){room.occupy.length - Number(room.infectedAmount)}
+                            &emsp;(-){Number(room.infectedAmount)}
                         </div>
                     ))
                 }

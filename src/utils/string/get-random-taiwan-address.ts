@@ -148,7 +148,7 @@ const selectFloor = () => {
     return '';
 };
 
-const selectAddress = (road) => {
+const selectAddress = (road: any) => {
 
     const addr = [
         road.city,
