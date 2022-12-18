@@ -10,7 +10,7 @@ const transferPatientsRenderer = (
             currentPosition,
             patient
         } = transferPatientWithRecord;
-        patient.infectStatus ? p5.fill('#f00') : p5.fill('#00000055');
+        patient.infectStatus ? p5.fill('#f00') : p5.fill('#000000AA');
         p5.strokeWeight(0);
         p5.ellipse(
             currentPosition.x,

@@ -34,6 +34,7 @@ interface PatientObject {
     transferringFrom: null | string;
     transferringTo: null | string;
     transferringProgress: number;
+    bedHistoryBackup?: BedHistory[];
 }
 
 interface BedHistory {

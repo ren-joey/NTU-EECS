@@ -1,4 +1,7 @@
 import patients from 'src/data-set/json-data/patients.json';
+import addDate from 'src/utils/date/add-date';
+import { exit } from '../renderers/leaving-patients-renderer';
+import { entrance } from '../renderers/new-patients-renderer';
 import getDefaultRoomMap from './get-default-room-map';
 
 const patientObjectDistributer = (
@@ -9,12 +12,13 @@ const patientObjectDistributer = (
 ): {
     roomObjects: RoomObject[],
     transferPatients: TransferRecord[],
-    newPatients: PatientObject[],
-    leavingPatients: PatientObject[]
+    newPatients: TransferRecord[],
+    leavingPatients: TransferRecord[]
 } => {
     const roomMap = getDefaultRoomMap(rooms);
     const newPatients = patients[now.toString()];
-    const leavingPatients: PatientObject[] = [];
+    const newPatientsWithRecord: TransferRecord[] = [];
+    const leavingPatients: TransferRecord[] = [];
     const transferPatients: TransferRecord[] = [];
 
     for (let i = 0; i < roomObjects.length; i += 1) {
@@ -40,9 +44,14 @@ const patientObjectDistributer = (
                         start: prevBed.transferOutDate,
                         end: transferPatient.bedHistory[0].transferInDate
                     });
-                    newPatients.push(transferPatient);
                 } else {
-                    leavingPatients.push(transferPatient);
+                    leavingPatients.push({
+                        patient: transferPatient,
+                        fromBed: roomObject,
+                        toBed: exit,
+                        start: prevBed.transferOutDate,
+                        end: addDate(prevBed.transferOutDate, 1000 * 60 * 60)
+                    });
                 }
             }
         }
@@ -51,7 +60,17 @@ const patientObjectDistributer = (
     if (newPatients && newPatients.length > 0) {
         for (let i = 0; i < newPatients.length; i++) {
             const patient = newPatients[i];
-            roomMap[patient.bedHistory[0].bedCode].push(patient);
+            const bedCode = patient.bedHistory[0].bedCode;
+            const toBed = getRoomByBedCode(bedCode);
+            const inDate = patient.bedHistory[0].transferInDate;
+            roomMap[bedCode].push(patient);
+            newPatientsWithRecord.push({
+                patient: patient,
+                fromBed: entrance,
+                toBed,
+                start: inDate,
+                end: addDate(inDate, 1000 * 60 * 60)
+            });
         }
     }
 
@@ -72,7 +91,7 @@ const patientObjectDistributer = (
     return {
         roomObjects,
         transferPatients,
-        newPatients,
+        newPatients: newPatientsWithRecord,
         leavingPatients
     };
 };

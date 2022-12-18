@@ -1,0 +1,32 @@
+.location-sketch {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #fff;
+    z-index: 3;
+
+    .cancel {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    .info {
+        position: absolute;
+        top: 200px;
+        left: 300px;
+
+        .title {
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+        }
+
+        &.infected {
+            font-weight: 900;
+            color: rgb(200, 0, 0);
+        }
+    }
+}

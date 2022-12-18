@@ -2,10 +2,12 @@ import './SideBar.scss';
 
 const SideBar = ({
     roomObject,
-    setSelectedRoom
+    setSelectedRoom,
+    setSelectedPatient
 }: {
     roomObject: RoomObject,
-    setSelectedRoom: (keu: (null|RoomObject)) => void
+    setSelectedRoom: (key: (null|RoomObject)) => void
+    setSelectedPatient: (key: (null|PatientObject)) => void
 }) => {
     return (
         <div className="side-bar">
@@ -17,7 +19,13 @@ const SideBar = ({
                 {
                     roomObject.occupy.map((patient) => {
                         return patient.infectStatus ? (
-                            <div key={patient.id}>
+                            <div
+                                key={patient.id}
+                                onClick={() => {
+                                    setSelectedRoom(null);
+                                    setSelectedPatient(patient);
+                                }}
+                            >
                                 {`${patient.id} ${patient.name}`}
                             </div>
                         ) : <></>;
@@ -33,7 +41,13 @@ const SideBar = ({
                         return patient.infectStatus ? (
                             <></>
                         ) : (
-                            <div key={patient.id}>
+                            <div
+                                key={patient.id}
+                                onClick={() => {
+                                    setSelectedRoom(null);
+                                    setSelectedPatient(patient);
+                                }}
+                            >
                                 {`${patient.id} ${patient.name}`}
                             </div>
                         );

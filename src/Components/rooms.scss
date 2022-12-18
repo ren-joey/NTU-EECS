@@ -18,9 +18,15 @@
         font-size: 8px;
         font-weight: 900;
         text-align: center;
-        background-color: #fff;
-        border: 1px solid #000;
-        opacity: 0.5;
+        color: rgba(0, 0, 0, 0.5);
+        background-color: rgba(235, 235, 235, 0.5);
+        border: 1px solid rgba(0, 0, 0, 0.5);
         transform: translate(-50%, -50%);
     }
+}
+
+.danger-text {
+    color: rgb(200, 0, 0);
+
+    // -webkit-text-stroke: 1px rgb(200, 0, 0);
 }

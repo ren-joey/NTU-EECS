@@ -5,6 +5,7 @@ import getRandomInteger from '../utils/math/get-random-integer';
 import { getRandomChineseName } from '../utils/string/get-random-chinese-name';
 import getRandomTaiwanAddress from '../utils/string/get-random-taiwan-address';
 import getRandomTaiwanId from '../utils/string/get-random-taiwan-id';
+import { cloneDeep } from 'lodash';
 
 const rooms = [
     '04A-01-01', '04A-01-02', '04A-01-03',
@@ -40,16 +41,18 @@ let infectRate = 0;
 const patientFactory = (start: Date): PatientObject => {
     infectRate += Math.abs(Math.random() * 0.2 - 0.12);
     if (infectRate > 1) infectRate = 1;
+    const bedHistory = bedHistoryFactory(start);
 
     return {
         id: getRandomTaiwanId(),
         name: getRandomChineseName(),
         address: getRandomTaiwanAddress(),
         infectStatus: Math.random() * infectRate > 0.95 ? true : false,
-        bedHistory: bedHistoryFactory(start),
+        bedHistory,
         transferringFrom: null,
         transferringTo: null,
-        transferringProgress: 0
+        transferringProgress: 0,
+        bedHistoryBackup: cloneDeep(bedHistory)
     };
 };
 

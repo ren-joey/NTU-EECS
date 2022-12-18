@@ -1,7 +1,6 @@
 import getRandomInteger from 'src/utils/math/get-random-integer';
 
 const getTransferPatientRecordsWithPosition = (
-    now: Date,
     transferRecords: (TransferRecord|TransferRecordWithPosition)[]
 ): TransferRecordWithPosition[] => {
     const transferRecordsWithPosition: TransferRecordWithPosition[] = [];
@@ -39,7 +38,7 @@ const getTransferPatientRecordsWithPosition = (
         } else {
             const periodX = transferRecord.toBed.x - transferRecord.fromBed.x;
             const periodY = transferRecord.toBed.y - transferRecord.fromBed.y;
-            const maxTimes = getRandomInteger(50, 180);
+            const maxTimes = getRandomInteger(50, 150);
 
             transferRecordsWithPosition.push({
                 ...transferRecord,

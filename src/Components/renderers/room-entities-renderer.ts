@@ -1,5 +1,4 @@
 import p5Types from 'p5';
-import getCanvasSize from '../functions/get-canvas-size';
 
 const roomEntitiesRenderer = (p5: p5Types, roomObjects: RoomObject[]) => {
     for (let i = 0; i < roomObjects.length; i++) {
@@ -18,10 +17,6 @@ const roomEntitiesRenderer = (p5: p5Types, roomObjects: RoomObject[]) => {
             size
         );
     }
-
-    p5.strokeWeight(1);
-    p5.fill('rgb(255, 255, 255)');
-    p5.rect(getCanvasSize() / 2 - 25, getCanvasSize() / 2 - 25, 50, 50);
 };
 
 export default roomEntitiesRenderer;
