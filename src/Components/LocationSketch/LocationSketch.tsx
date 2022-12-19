@@ -1,13 +1,19 @@
-import p5 from 'p5';
 import p5Types from 'p5';
+import { useState } from 'react';
 import Sketch from 'react-p5';
+import getAxisInfoByBedHistories from '../functions/get-axis-info-by-bed-history';
 import getCanvasSize from '../functions/get-canvas-size';
+import chatRenderer from '../renderers/chat-renderer';
+import timelineRenderer from '../renderers/timeline-renderer';
 import './LocationSketch.scss';
 
-interface Point {
-    x: number;
-    y: number;
-}
+const bedHistoriesPreprocessing = (bedHistories: BedHistory[]) => {
+    return bedHistories.map((bedHistory) => {
+        bedHistory.transferInDate = new Date(bedHistory.transferInDate);
+        bedHistory.transferOutDate = new Date(bedHistory.transferOutDate);
+        return bedHistory;
+    });
+};
 
 const LocationSketch = ({
     patientObject,
@@ -16,117 +22,51 @@ const LocationSketch = ({
     patientObject: PatientObject,
     setSelectedPatient: (key: (null|PatientObject)) => void
 }) => {
+    const [isDrawn, setIsDrawn] = useState(false);
+    const [bedHistories] = useState<BedHistory[]>(
+        bedHistoriesPreprocessing(
+            patientObject.bedHistoryBackup || patientObject.bedHistory
+        )
+    );
     const setup = (p5: p5Types, canvasParentRef: Element) => {
         p5.createCanvas(getCanvasSize(), getCanvasSize()).parent(canvasParentRef);
     };
 
     const draw = (p5: p5Types) => {
-
-        if (patientObject.bedHistoryBackup === undefined) return;
-
-        const xLabels: string[] = [];
-        const yLabels: string[] = [];
-        const points: Point[] = [];
+        // if (isDrawn) return;
         p5.clear();
 
-        const width = getCanvasSize() - 400;
-        const height = 300;
-        const x = 300;
-        const y = getCanvasSize() / 2 - 150;
-        p5.textStyle('normal');
-        p5.stroke('rgba(0, 0, 0, 1)');
-        p5.fill('rgba(255, 255, 255, 0)');
-        p5.strokeWeight(1);
-        p5.rect(
-            x,
-            y,
-            width,
-            height
+        const chatPosition: ChatPosition = {
+            x: 300,
+            y: getCanvasSize() / 2 - 150,
+            width: getCanvasSize() - 400,
+            height: 300
+        };
+
+        const {
+            xAxis,
+            yAxis,
+            gridMap
+            // gridPoints
+        } = getAxisInfoByBedHistories(
+            chatPosition,
+            bedHistories
         );
 
-        const { bedHistoryBackup: bedHistory } = patientObject;
-        for (let i = 0; i < bedHistory.length; i++) {
-            const record = bedHistory[i];
-            xLabels.push(new Date(record.transferInDate).toLocaleDateString());
-            yLabels.push(record.bedCode);
-            if (i === bedHistory.length - 1) {
-                xLabels.push(
-                    new Date(record.transferOutDate).toLocaleDateString()
-                );
-                yLabels.push('entrance/exit');
-            }
-        }
+        chatRenderer(
+            p5,
+            chatPosition,
+            xAxis,
+            yAxis
+        );
 
-        const xGap = width / (xLabels.length + 1);
-        const yGap = height / (yLabels.length + 1);
-        points.push({
-            x: x,
-            y: y + yGap * (yLabels.length)
-        });
-        points.push({
-            x: x + xGap,
-            y: y + yGap * (yLabels.length)
-        });
+        timelineRenderer(
+            p5,
+            bedHistories,
+            gridMap
+        );
 
-        xLabels.forEach((label, idx) => {
-            p5.fill(0x0);
-            p5.strokeWeight(0);
-            p5.text(
-                label,
-                x + (xGap * (idx + 1)),
-                y + height + 20
-            );
-
-            points.push({
-                x: x + (xGap * (idx + 1)),
-                y: y + (yGap * (idx + 1))
-            });
-            points.push({
-                x: x + (xGap * (idx + 2)),
-                y: y + (yGap * (idx + 1))
-            });
-        });
-
-        points.push({
-            x: x + (xGap * xLabels.length),
-            y: y + yGap * (yLabels.length)
-        });
-        points.push({
-            x: x + width,
-            y: y + yGap * (yLabels.length)
-        });
-
-        yLabels.forEach((label, idx) => {
-            p5.fill(0x0);
-            p5.strokeWeight(0);
-            p5.text(
-                label,
-                x - 100,
-                y + (yGap * (idx + 1))
-            );
-
-            p5.stroke('rgba(0, 0, 0, 0.1)');
-            p5.strokeWeight(1);
-            p5.line(
-                x,
-                y + (yGap * (idx + 1)),
-                x + width,
-                y + (yGap * (idx + 1))
-            );
-        });
-
-        for (let i = 0; i < points.length - 1; i++) {
-            const point = points[i];
-            const nextPoint = points[i + 1];
-            p5.stroke('green');
-            p5.strokeWeight(3);
-            p5.line(
-                point.x,
-                point.y,
-                nextPoint.x,
-                nextPoint.y
-            );
-        }
+        setIsDrawn(true);
     };
 
     return (
