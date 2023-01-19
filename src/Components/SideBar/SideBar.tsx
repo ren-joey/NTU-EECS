@@ -3,15 +3,23 @@ import './SideBar.scss';
 const SideBar = ({
     roomObject,
     setSelectedRoom,
-    setSelectedPatient
+    setSelectedPatient,
+    setPaused
 }: {
-    roomObject: RoomObject,
-    setSelectedRoom: (key: (null|RoomObject)) => void
-    setSelectedPatient: (key: (null|PatientObject)) => void
+    roomObject: RoomObject;
+    setSelectedRoom: (key: (null|RoomObject)) => void;
+    setSelectedPatient: (key: (null|PatientObject)) => void;
+    setPaused: (key: boolean) => void;
 }) => {
     return (
         <div className="side-bar">
-            <div onClick={() => setSelectedRoom(null)}>X</div>
+            <div
+                onClick={() => {
+                    setSelectedRoom(null);
+                    setPaused(false);
+                }}
+            >X
+            </div>
             <div className="infected-patients">
                 <div>
                     COVID-19 infected
@@ -22,7 +30,7 @@ const SideBar = ({
                             <div
                                 key={patient.id}
                                 onClick={() => {
-                                    setSelectedRoom(null);
+                                    // setSelectedRoom(null);
                                     setSelectedPatient(patient);
                                 }}
                             >
@@ -44,7 +52,7 @@ const SideBar = ({
                             <div
                                 key={patient.id}
                                 onClick={() => {
-                                    setSelectedRoom(null);
+                                    // setSelectedRoom(null);
                                     setSelectedPatient(patient);
                                 }}
                             >

@@ -32,7 +32,7 @@ const P5Sketch = () => {
         roomObjectsOrganizer(rooms)
     );
     const [selectedRoom, setSelectedRoom] = useState<null|RoomObject>(null);
-    const [selectedPatient, setSelectedPatient] = useState<null|PatientObject>(null);
+    const [selectedPatient, _setSelectedPatient] = useState<null|PatientObject>(null);
     const [paused, setPaused] = useState(false);
     const [
         transferPatientsWithRecord,
@@ -55,6 +55,14 @@ const P5Sketch = () => {
         return roomMap[bedCode];
     };
     const togglePause = () => setPaused((b) => !b);
+    const setSelectedPatient = (patient: (PatientObject | null)) => {
+        _setSelectedPatient(null);
+        if (patient !== null) {
+            setTimeout(() => {
+                _setSelectedPatient(patient);
+            }, 100);
+        }
+    };
     const setSpeedAndResetCounter = (speed: number) => {
         setSpeed(speed);
         counter = 0;
@@ -133,6 +141,7 @@ const P5Sketch = () => {
                         roomObject={selectedRoom}
                         setSelectedRoom={setSelectedRoom}
                         setSelectedPatient={setSelectedPatient}
+                        setPaused={setPaused}
                     />
                 )
             }
@@ -183,7 +192,10 @@ const P5Sketch = () => {
                                 top: room.y,
                                 left: room.x
                             }}
-                            onClick={() => setSelectedRoom(room)}
+                            onClick={() => {
+                                setSelectedRoom(room);
+                                setPaused(true);
+                            }}
                             key={`room${idx}`}
                         >
                             {room.name}
